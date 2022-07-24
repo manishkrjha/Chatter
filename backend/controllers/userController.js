@@ -60,5 +60,22 @@ const authUser = asyncHandler( async (req, res) => {
     }
 });
 
+//sending the call as Queries
+// /api/users?search=sergio
+// $options: i means that the data can be both uppercase or lowercase 
+const allUsers = asyncHandler( async (req, res) => {
+    const keyword = req.query.search ?
+    {
+        $or: [
+          { name: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+    : {};
+
+    const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+    res.send(users);
+}); 
+
 //exporting like this because not a default export
-module.exports = {registerUser, authUser};
+module.exports = {registerUser, authUser, allUsers};
